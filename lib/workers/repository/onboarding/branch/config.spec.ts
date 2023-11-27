@@ -68,7 +68,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       });
     });
 
-    it('handles finding a preset in a parent group', async () => {
+    it('handles finding a preset in org level', async () => {
       config.repository = 'org/group/repo';
       mockedPresets.getPreset.mockImplementation(({ repo }) => {
         if (repo === 'org/renovate-config') {
@@ -81,6 +81,40 @@ describe('workers/repository/onboarding/branch/config', () => {
       expect(onboardingConfig).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['local>org/renovate-config'],
+      });
+      mockedPresets.getPreset.mockClear();
+    });
+
+    it('handles finding a preset in group level', async () => {
+      config.repository = 'org/group/subgroup/repo';
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/group/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/group/renovate-config'],
+      });
+      mockedPresets.getPreset.mockClear();
+    });
+
+    it('handles finding a preset in subgroup level', async () => {
+      config.repository = 'org/group/subgroup/repo';
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/group/subgroup/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/group/subgroup/renovate-config'],
       });
       mockedPresets.getPreset.mockClear();
     });

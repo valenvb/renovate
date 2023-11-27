@@ -235,6 +235,39 @@ For example the result may be:
 }
 ```
 
+### Group/Subgroup level presets (GitLab only)
+
+GitLab have a feature to nest repositories into several levels of groups. You can create a repository called `renovate-config` under any group/subgroup with a `default.json` file.
+
+If found, that repository's preset will be suggested as the sole extended preset only for repositories under that group/subgroup, and any existing `onboardingConfig` config will be ignored/overridden.
+
+You can have several repositories called `renovate-config` on several groups or subgroups, each one with differents preset, but when the first one is found the others under it won't be considered.
+
+For example the result may be:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>myorgname/group/subgroup1/renovate-config"]
+}
+```
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>myorgname/group/subgroup2/renovate-config"]
+}
+```
+
+OR
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>myorgname/group/renovate-config"]
+}
+```
+
 ## npm-hosted presets
 
 <!-- prettier-ignore -->
